@@ -1,4 +1,5 @@
 import os
+import sys
 
 import pystray
 from PIL import Image, ImageDraw
@@ -15,7 +16,21 @@ _KEY_OPTIONS = [
 _MODIFIERS = ["ctrl", "shift", "alt", "win"]
 
 
+def _icon_path():
+    if getattr(sys, 'frozen', False):
+        return os.path.join(os.path.dirname(sys.executable), "ThaSkull.ico")
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "ThaSkull.ico")
+
 def _make_image(hex_color):
+    try:
+        path = _icon_path()
+        if os.path.exists(path):
+            img = Image.open(path)
+            if img.size != (64, 64):
+                img = img.resize((64, 64), Image.LANCZOS)
+            return img.convert("RGBA")
+    except Exception:
+        pass
     size = 64
     img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
