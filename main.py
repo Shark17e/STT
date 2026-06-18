@@ -86,7 +86,7 @@ def _ensure_model(config):
 def _download_dialog(config):
     root = tk.Tk()
     root.title("TTS - Scarica modelli")
-    root.geometry("480x420")
+    root.geometry("480x460")
     root.resizable(False, False)
     root.update_idletasks()
     x = (root.winfo_screenwidth() // 2) - (root.winfo_width() // 2)
@@ -106,6 +106,8 @@ def _download_dialog(config):
         cb = tk.Checkbutton(frame, text=f"{name:8s}  {SIZES_LABEL[name]:>8s}", variable=v, anchor="w")
         cb.pack(fill=tk.X, padx=20, pady=1)
         vars[name] = v
+
+    tk.Label(root, text="I modelli verranno salvati nella cartella 'whisper-models/'", fg="gray", font=("", 8)).pack()
 
     bar = ttk.Progressbar(root, mode="determinate", value=0)
     status_label = tk.Label(root, text="", fg="gray")
@@ -134,6 +136,9 @@ def _download_dialog(config):
         bar["value"] = 100
         file_label.config(text="")
         status_label.config(text="Download completato!")
+        start_btn.destroy()
+        cancel_btn.destroy()
+        tk.Button(root, text="Continua", command=root.destroy, width=20).pack(pady=10)
 
     def _download_task():
         from download_models import download_model, DownloadCancelled
@@ -142,7 +147,8 @@ def _download_dialog(config):
         if not selected:
             return
 
-        base_dir = os.path.join(get_base_dir(), config["whisper"]["model_dir"])
+        d = config["whisper"]["model_dir"]
+        base_dir = os.path.join(get_base_dir(), d) if not os.path.isabs(d) else d
         total_selected = len(selected)
 
         for i, name in enumerate(selected):
@@ -197,7 +203,8 @@ def _download_dialog(config):
     bar.pack(fill=tk.X, padx=20, pady=5)
     status_label.pack()
 
-    tk.Button(root, text="Annulla", command=_on_close).pack(pady=5)
+    cancel_btn = tk.Button(root, text="Annulla", command=_on_close)
+    cancel_btn.pack(pady=5)
 
     root.mainloop()
 

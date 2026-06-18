@@ -17,7 +17,7 @@ class Transcriber:
     def _get_model_path(self):
         model_size = self._config["whisper"]["model_size"]
         model_dir = self._config["whisper"]["model_dir"]
-        base = os.path.join(get_base_dir(), model_dir)
+        base = os.path.join(get_base_dir(), model_dir) if not os.path.isabs(model_dir) else model_dir
         local = os.path.join(base, model_size)
         if os.path.isdir(local):
             return local
