@@ -61,3 +61,11 @@ class Transcriber:
         segments, _ = self._model.transcribe(audio, language="it", beam_size=5)
         text = " ".join(segment.text for segment in segments)
         return text.strip()
+
+    def reload(self, model_size):
+        self._config["whisper"]["model_size"] = model_size
+        self._model = None
+        self._ready = False
+        self._error = None
+        self._load_thread = threading.Thread(target=self._load, daemon=True)
+        self._load_thread.start()

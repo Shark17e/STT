@@ -1,6 +1,8 @@
 import pystray
 from PIL import Image, ImageDraw
 
+_MODEL_SIZES = ["tiny", "base", "small", "medium", "large-v3"]
+
 
 def _make_image(hex_color):
     size = 64
@@ -12,14 +14,61 @@ def _make_image(hex_color):
 
 
 class TrayIcon:
-    def __init__(self, on_exit):
-        menu = pystray.Menu(pystray.MenuItem("Esci", lambda icon: on_exit()))
-        self._icon = pystray.Icon(
+    def __init__(self, config, on_exit, on_model_change, on_open_settings):
+        self._config = config
+        self._model = config["whisper"]["model_size"]
+        self._on_exit = on_exit
+        self._on_model_change = on_model_change
+        self._on_open_settings = on_open_settings
+        self._icon = self._build_icon()
+
+    def _build_menu(self):
+        model_items = []
+        for size in _MODEL_SIZES:
+            model_items.append(
+                pystray.MenuItem(
+                    size,
+                    lambda _icon, _item, sz=size: self._on_model_change(sz),
+                    checked=lambda _item, sz=size: self._model == sz,
+                    radio=True,
+                )
+            )
+
+        return pystray.Menu(
+            pystray.MenuItem(
+                lambda _icon, _item: f"Dictate-Win",
+                None,
+                enabled=False,
+            ),
+            pystray.MenuItem(
+                lambda _icon, _item: f"Hotkey: {self._hotkey_display()}",
+                None,
+                enabled=False,
+            ),
+            pystray.Menu.SEPARATOR,
+            pystray.MenuItem("Modello", pystray.Menu(*model_items)),
+            pystray.MenuItem("Apri impostazioni", lambda _icon, _item: self._on_open_settings()),
+            pystray.Menu.SEPARATOR,
+            pystray.MenuItem("Esci", lambda _icon: self._on_exit()),
+        )
+
+    def _build_icon(self):
+        return pystray.Icon(
             "dictate-win",
             _make_image("#22c55e"),
             "Dictate-Win - In ascolto",
-            menu,
+            self._build_menu(),
         )
+
+    def _hotkey_display(self):
+        parts = [m.capitalize() for m in self._config["hotkey"]["modifiers"]]
+        key = self._config["hotkey"]["key"]
+        parts.append(key.capitalize() if len(key) > 1 else key.upper())
+        return "+".join(parts)
+
+    def update_model(self, model_size):
+        self._model = model_size
+        self._icon.menu = self._build_menu()
 
     def set_idle(self):
         self._icon.icon = _make_image("#22c55e")

@@ -1,6 +1,9 @@
 {
   "hotkey": {
-    "modifiers": ["ctrl", "shift"],
+    "modifiers": [
+      "ctrl",
+      "shift"
+    ],
     "key": "space"
   },
   "whisper": {

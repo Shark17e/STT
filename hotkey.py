@@ -6,13 +6,17 @@ _SPECIAL_KEYS = {
     "insert", "menu", "esc", "pause", "print_screen",
     "caps_lock", "num_lock", "scroll_lock",
 }
-for i in range(1, 21):
+for i in range(1, 25):
     _SPECIAL_KEYS.add(f"f{i}")
+
+_KEY_ALIASES = {
+    "copilot": "f23",
+}
 
 
 def _build_hotkey_str(config):
     parts = [f"<{m}>" for m in config["hotkey"]["modifiers"]]
-    key = config["hotkey"]["key"]
+    key = _KEY_ALIASES.get(config["hotkey"]["key"], config["hotkey"]["key"])
     parts.append(f"<{key}>" if key in _SPECIAL_KEYS else key)
     return "+".join(parts)
 

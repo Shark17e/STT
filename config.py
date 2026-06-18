@@ -22,9 +22,13 @@ _DEFAULT_CONFIG = {
 }
 
 
+def get_config_path():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+
+
 def load_config(path=None):
     if path is None:
-        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+        path = get_config_path()
 
     config = _DEFAULT_CONFIG.copy()
 
@@ -38,3 +42,10 @@ def load_config(path=None):
                 config[section] = values
 
     return config
+
+
+def save_config(config, path=None):
+    if path is None:
+        path = get_config_path()
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(config, f, indent=2, ensure_ascii=False)

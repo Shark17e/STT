@@ -1,7 +1,8 @@
+import os
 import sys
 import threading
 
-from config import load_config
+from config import load_config, save_config, get_config_path
 from hotkey import HotkeyListener
 from paster import paste_text
 from recorder import Recorder
@@ -10,13 +11,20 @@ from tray import TrayIcon
 
 
 def main():
+    config_path = get_config_path()
+
     try:
-        config = load_config()
+        config = load_config(config_path)
     except Exception as e:
         print(f"Errore caricamento config.json: {e}", file=sys.stderr)
         sys.exit(1)
 
-    tray = TrayIcon(on_exit=lambda: tray.stop())
+    tray = TrayIcon(
+        config=config,
+        on_exit=lambda: tray.stop(),
+        on_model_change=lambda model: _on_model_change(model),
+        on_open_settings=lambda: os.startfile(config_path),
+    )
     tray.set_error("Avvio...")
 
     try:
@@ -30,6 +38,14 @@ def main():
     except Exception as e:
         print(f"Errore caricamento modello: {e}", file=sys.stderr)
         transcriber = None
+
+    def _on_model_change(new_model):
+        nonlocal config
+        config["whisper"]["model_size"] = new_model
+        save_config(config, config_path)
+        tray.update_model(new_model)
+        if transcriber is not None:
+            transcriber.reload(new_model)
 
     _lock = threading.Lock()
 
