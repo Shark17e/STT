@@ -1,5 +1,7 @@
 import json
 import os
+import sys
+import shutil
 
 from paths import get_base_dir
 
@@ -25,7 +27,13 @@ _DEFAULT_CONFIG = {
 
 
 def get_config_path():
-    return os.path.join(get_base_dir(), "config.json")
+    path = os.path.join(get_base_dir(), "config.json")
+    if not os.path.exists(path) and getattr(sys, 'frozen', False):
+        bundled = os.path.join(sys._MEIPASS, "config.json")
+        if os.path.exists(bundled):
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            shutil.copy2(bundled, path)
+    return path
 
 
 def load_config(path=None):

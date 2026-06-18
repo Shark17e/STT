@@ -64,7 +64,10 @@ def _ensure_model(config):
     )
 
     if ret == 6:
+        root = tk.Tk()
+        root.withdraw()
         folder = filedialog.askdirectory(title="Seleziona cartella whisper-models")
+        root.destroy()
         if folder:
             found = _find_models_in_folder(folder)
             if found:
@@ -300,6 +303,26 @@ def main():
         if transcriber is not None:
             transcriber.reload(new_model)
 
+    def _on_model_folder_change():
+        nonlocal config, transcriber
+        folder = filedialog.askdirectory(title="Seleziona cartella con modelli Whisper (whisper-models)")
+        if not folder:
+            return
+        found = _find_models_in_folder(folder)
+        if not found:
+            ctypes.windll.user32.MessageBoxW(
+                0, "Nella cartella selezionata non ci sono modelli validi (manca model.bin).",
+                "TTS", 16
+            )
+            return
+        config["whisper"]["model_dir"] = folder
+        if config["whisper"]["model_size"] not in found:
+            config["whisper"]["model_size"] = found[0]
+        save_config(config, config_path)
+        tray.update_config(config)
+        if transcriber is not None:
+            transcriber.reload(config["whisper"]["model_size"])
+
     def _on_hotkey_change():
         nonlocal config, hotkey
         save_config(config, config_path)
@@ -351,6 +374,7 @@ def main():
         on_exit=_on_exit,
         on_model_change=_on_model_change,
         on_hotkey_change=_on_hotkey_change,
+        on_model_folder_change=_on_model_folder_change,
     )
     tray.set_idle()
     tray.run()
