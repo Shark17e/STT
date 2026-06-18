@@ -23,13 +23,12 @@ def _make_image(hex_color):
 
 
 class TrayIcon:
-    def __init__(self, config, on_exit, on_model_change, on_hotkey_change, on_model_folder_change):
+    def __init__(self, config, on_exit, on_model_change, on_hotkey_change):
         self._config = config
         self._model = config["whisper"]["model_size"]
         self._on_exit = on_exit
         self._on_model_change = on_model_change
         self._on_hotkey_change = on_hotkey_change
-        self._on_model_folder_change = on_model_folder_change
         self._icon = self._build_icon()
 
     # --- helpers ---
@@ -104,16 +103,13 @@ class TrayIcon:
             for k in _KEY_OPTIONS
         ]
 
+        from paths import get_base_dir
         return pystray.Menu(
             pystray.MenuItem("Dictate-Win", None, enabled=False),
             pystray.MenuItem(f"Hotkey: {self._hotkey_display()}", None, enabled=False),
+            pystray.MenuItem(f"Base: {get_base_dir()}", None, enabled=False),
             pystray.Menu.SEPARATOR,
-            pystray.MenuItem("Modello", pystray.Menu(
-                *model_items,
-                pystray.Menu.SEPARATOR,
-                pystray.MenuItem(f"Cartella: {self._config['whisper']['model_dir']}", None, enabled=False),
-                pystray.MenuItem("Seleziona cartella modelli...", lambda icon: self._on_model_folder_change()),
-            )),
+            pystray.MenuItem("Modello", pystray.Menu(*model_items)),
             pystray.MenuItem("Modificatori", pystray.Menu(*mod_items)),
             pystray.MenuItem("Tasto", pystray.Menu(*key_items)),
             pystray.Menu.SEPARATOR,

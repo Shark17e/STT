@@ -50,27 +50,31 @@ def _find_models_in_folder(folder):
 
 
 def _ensure_model(config):
-    searched = _model_path(config)
+    d = config["whisper"]["model_dir"]
+    if os.path.isabs(d) and not os.path.isdir(os.path.join(d, config["whisper"]["model_size"])):
+        config["whisper"]["model_dir"] = "whisper-models"
+        save_config(config, get_config_path())
+
     if _model_is_available(config):
         return True
 
+    root = tk.Tk()
+    root.withdraw()
+    searched = _model_path(config)
     ret = ctypes.windll.user32.MessageBoxW(
         0,
-        "Nessun modello Whisper trovato.\n\n"
+        f"Nessun modello Whisper trovato.\n\n"
         f"Ricercato in:\n{searched}\n\n"
-        "Hai già una cartella con i modelli?\n"
-        "Seleziona Sì per scegliere la cartella,\n"
-        "No per scaricarli ora.",
+        "Hai una cartella con i modelli?\n"
+        "Scegli Sì per selezionarla,\n"
+        "No per scaricarli ora,\n"
+        "Annulla per uscire.",
         "TTS - Modelli mancanti",
-        4 | 32,
+        3 | 32,
     )
 
     if ret == 6:
-        root = tk.Tk()
-        root.withdraw()
-        root.attributes('-topmost', True)
         folder = filedialog.askdirectory(title="Seleziona cartella whisper-models")
-        root.destroy()
         if folder:
             found = _find_models_in_folder(folder)
             if found:
@@ -79,12 +83,17 @@ def _ensure_model(config):
                 if config["whisper"]["model_size"] not in found:
                     config["whisper"]["model_size"] = found[0]
                     save_config(config, get_config_path())
+                root.destroy()
                 return True
-            else:
-                ctypes.windll.user32.MessageBoxW(
-                    0, "Nella cartella selezionata non ci sono modelli validi.",
-                    "TTS", 16
-                )
+            ctypes.windll.user32.MessageBoxW(
+                0, "Nella cartella selezionata non ci sono modelli validi.",
+                "TTS", 16
+            )
+
+    root.destroy()
+
+    if ret == 2:
+        return False
 
     return _download_dialog(config)
 
@@ -181,7 +190,7 @@ def _download_dialog(config):
 
     def _err(e):
         bar["value"] = 0
-        status_label.config(text=f"❌ Errore: {e}", fg="red")
+        status_label.config(text=f"Errore: {e}", fg="red")
         file_label.config(text="")
 
     def _start():
@@ -306,30 +315,6 @@ def main():
         if transcriber is not None:
             transcriber.reload(new_model)
 
-    def _on_model_folder_change():
-        nonlocal config, transcriber
-        root = tk.Tk()
-        root.withdraw()
-        root.attributes('-topmost', True)
-        folder = filedialog.askdirectory(title="Seleziona cartella con modelli Whisper (whisper-models)")
-        root.destroy()
-        if not folder:
-            return
-        found = _find_models_in_folder(folder)
-        if not found:
-            ctypes.windll.user32.MessageBoxW(
-                0, "Nella cartella selezionata non ci sono modelli validi (manca model.bin).",
-                "TTS", 16
-            )
-            return
-        config["whisper"]["model_dir"] = folder
-        if config["whisper"]["model_size"] not in found:
-            config["whisper"]["model_size"] = found[0]
-        save_config(config, config_path)
-        tray.update_config(config)
-        if transcriber is not None:
-            transcriber.reload(config["whisper"]["model_size"])
-
     def _on_hotkey_change():
         nonlocal config, hotkey
         save_config(config, config_path)
@@ -381,7 +366,6 @@ def main():
         on_exit=_on_exit,
         on_model_change=_on_model_change,
         on_hotkey_change=_on_hotkey_change,
-        on_model_folder_change=_on_model_folder_change,
     )
     tray.set_idle()
     tray.run()

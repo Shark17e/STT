@@ -1,22 +1,22 @@
 {
-    "hotkey":  {
-                   "modifiers":  [
-                                     "win",
-                                     "shift"
-                                 ],
-                   "key":  "f23"
-               },
-    "whisper":  {
-                    "model_size":  "medium",
-                    "model_dir":  "whisper-models",
-                    "device":  "cpu",
-                    "compute_type":  "int8"
-                },
-    "audio":  {
-                  "sample_rate":  16000,
-                  "silence_threshold":  0.03,
-                  "silence_duration_sec":  1.5,
-                  "min_duration_sec":  0.5,
-                  "max_duration_sec":  30
-              }
+  "hotkey": {
+    "modifiers": [
+      "win",
+      "shift"
+    ],
+    "key": "f23"
+  },
+  "whisper": {
+    "model_size": "medium",
+    "model_dir": "whisper-models",
+    "device": "cpu",
+    "compute_type": "int8"
+  },
+  "audio": {
+    "sample_rate": 16000,
+    "silence_threshold": 0.03,
+    "silence_duration_sec": 1.5,
+    "min_duration_sec": 0.5,
+    "max_duration_sec": 30
+  }
 }
