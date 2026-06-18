@@ -8,7 +8,7 @@ MODELS = {
     "base": "guillaumekln/faster-whisper-base",
     "small": "guillaumekln/faster-whisper-small",
     "medium": "guillaumekln/faster-whisper-medium",
-    "large-v3": "guillaumekln/faster-whisper-large-v3",
+    "large-v3": "Systran/faster-whisper-large-v3",
 }
 
 SIZES = {
