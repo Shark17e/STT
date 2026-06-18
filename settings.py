@@ -28,6 +28,9 @@ def open_settings(on_save):
     root = tk.Tk()
     root.title("Dictate-Win - Impostazioni")
     root.resizable(False, False)
+    root.attributes("-topmost", True)
+    root.focus_force()
+    root.lift()
 
     frame = ttk.Frame(root, padding=15)
     frame.pack()
@@ -44,7 +47,7 @@ def open_settings(on_save):
     model_frame.grid(row=row, column=0, columnspan=2, sticky="we", pady=(0, 10))
     for i, size in enumerate(_MODEL_SIZES):
         ttk.Radiobutton(model_frame, text=size, variable=model_var, value=size).pack(
-            side="left", padx=2
+            side="left", padx=4
         )
     row += 1
 
@@ -66,7 +69,7 @@ def open_settings(on_save):
         var = tk.BooleanVar(value=mod in mods)
         mod_vars[mod] = var
         ttk.Checkbutton(mods_frame, text=mod.upper(), variable=var).pack(
-            side="left", padx=3
+            side="left", padx=4
         )
     row += 1
 
@@ -83,9 +86,13 @@ def open_settings(on_save):
 
     ttk.Label(
         frame,
-        text="Suggerimento: 'copilot' = tasto Copilot della tastiera",
+        text=(
+            "Nota: il tasto Copilot hardware invia Win+Shift+F23. "
+            "Se usi 'copilot', win/shift sono impliciti."
+        ),
         foreground="gray",
         font=("", 8),
+        wraplength=320,
     ).grid(row=row, column=0, columnspan=2, sticky="w", pady=(2, 10))
     row += 1
 
@@ -100,8 +107,8 @@ def open_settings(on_save):
         config["hotkey"]["key"] = key_var.get()
         with open(config_path, "w", encoding="utf-8") as f:
             json.dump(config, f, indent=2, ensure_ascii=False)
-        on_save(config)
         root.destroy()
+        on_save(config)
 
     ttk.Button(btn_frame, text="Salva", command=save).pack(side="left", padx=5)
     ttk.Button(btn_frame, text="Annulla", command=root.destroy).pack(

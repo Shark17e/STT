@@ -13,12 +13,10 @@ _KEY_ALIASES = {
     "copilot": "f23",
 }
 
-# VK codes for modifier tracking in low-level hook
-_MOD_VK = {
+# VK codes — Win+Shift sono parte dell'hardware Copilot, non vanno tracciati
+_USER_MOD_VK = {
     0xA2: "ctrl", 0xA3: "ctrl",  # Ctrl
-    0xA0: "shift", 0xA1: "shift",  # Shift
-    0xA4: "alt", 0xA5: "alt",  # Alt
-    0x5B: "win", 0x5C: "win",  # Win
+    0xA4: "alt", 0xA5: "alt",    # Alt
 }
 
 _F23_VK = 0x86
@@ -53,15 +51,15 @@ class HotkeyListener:
             self._listeners.append(ghk)
 
     def _start_copilot_mode(self):
-        expected_mods = set(self._config["hotkey"]["modifiers"])
+        expected_mods = set(self._config["hotkey"]["modifiers"]) - {"win", "shift"}
         pressed = set()
 
         def event_filter(msg, data):
             nonlocal pressed
             vk = data.vkCode
 
-            if vk in _MOD_VK:
-                mod = _MOD_VK[vk]
+            if vk in _USER_MOD_VK:
+                mod = _USER_MOD_VK[vk]
                 is_down = msg in (0x0100, 0x0104)
                 if is_down:
                     pressed.add(mod)

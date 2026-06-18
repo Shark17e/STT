@@ -66,6 +66,11 @@ class TrayIcon:
         self._model = model_size
         self._icon.menu = self._build_menu()
 
+    def update_config(self, config):
+        self._config = config
+        self._model = config["whisper"]["model_size"]
+        self._icon.menu = self._build_menu()
+
     def set_idle(self):
         self._icon.icon = _make_image("#22c55e")
         self._icon.title = "Dictate-Win - In ascolto"

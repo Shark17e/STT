@@ -79,8 +79,9 @@ def main():
                     hotkey = new_hotkey
                     old_hotkey.stop()
 
+            tray.update_config(config)
+
             if config["whisper"]["model_size"] != old_model:
-                tray.update_model(config["whisper"]["model_size"])
                 if transcriber is not None:
                     transcriber.reload(config["whisper"]["model_size"])
 
