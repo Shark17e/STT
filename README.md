@@ -1,4 +1,4 @@
-# TTS - Dettatura Vocale Offline
+# STT - Dettatura Vocale Offline
 
 Trascrivi la voce in testo con Whisper (offline, 100% locale) e incolla il risultato nella finestra attiva. Funziona interamente in system tray, senza finestre visibili.
 
